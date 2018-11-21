@@ -4,36 +4,7 @@
         <title>Países que más CO2 emiten a la atmósfera</title>
         <meta charset="utf-8">
         <script src="d3.v5.min.js"></script>
-        <script src="https://d3js.org/d3-array.v1.min.js"></script>
-        <script src="https://d3js.org/d3-geo.v1.min.js"></script>
-        <script src="https://d3js.org/d3-color.v1.min.js"></script>
-<script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
-<script src="https://d3js.org/d3-ease.v1.min.js"></script>
-<script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-<script src="https://d3js.org/d3-selection.v1.min.js"></script>
-<script src="https://d3js.org/d3-timer.v1.min.js"></script>
-<script src="https://d3js.org/d3-transition.v1.min.js"></script>
-<script src="https://d3js.org/d3-drag.v1.min.js"></script>
-<script src="https://d3js.org/d3-zoom.v1.min.js"></script>
-        <style>
-            body{
-                margin: 0;
-                padding: 0;
-                font-family: Courier;
-            }
-            #control{
-                margin-top: -100px;
-                margin-left: 10px;
-                padding-left: 10px;
-            }
-            select{
-                font-family: Courier;
-                border: solid 1px black;
-            }
-            label{
-                font-weight: bold;
-            }
-        </style>
+        <link href="main.css" rel="stylesheet" type="text/css">
     </head>
     <body>
         <div id="grafico">
@@ -46,6 +17,13 @@
                 <option value="population">Per Capita</option>
                 <option value="land">Per Land</option>
             </select>
+            <br>
+            <label>Year</label>
+            <span id="yearOutput"></span>
+            <br>
+            <label>1960</label>
+            <input type="range" id="year" min="1960" max="2016">
+            <label>2016</label>
         </div>
         <script src="grafico.js" async defer></script>
     </body>

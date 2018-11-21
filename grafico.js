@@ -24,68 +24,16 @@ Promise.all([emissionData,populationData,landData,mapData])
     let features = mapData.features;
 
     let mode = "total";
+    let year = "2016";
 
-    let maxEmission = 0;
-    emissionData.filter((data)=>{
-        return data.Year == "2016";
-    }).forEach((data)=>{
-        for(let i=0;i<features.length;i++){
-            if(features[i].properties.iso_a3 === data.Code){
-                features[i].properties.emissionData = parseFloat(data.Emissions);
-                if(parseFloat(data.Emissions) > maxEmission){
-                    maxEmission = parseFloat(data.Emissions);
-                }
-            }
-        }
-    });
-
-    let maxEmissionPerCapita = 0;
-    for(let i=0;i<features.length;i++){
-        for(let j=0;j<populationData.length;j++){
-            if(features[i].properties.iso_a3 === populationData[j].CountryCode){
-                let emission = features[i].properties.emissionData;
-                let population = parseFloat(populationData[j]["2016"]);
-                features[i].properties.emissionPerCapitaData = emission / population;
-                if(features[i].properties.emissionPerCapitaData > maxEmissionPerCapita){
-                    maxEmissionPerCapita = features[i].properties.emissionPerCapitaData;
-                }
-            }
-        }
-    }
-
-    let maxEmissionPerLand = 0;
-    for(let i=0;i<features.length;i++){
-        for(let j=0;j<landData.length;j++){
-            if(features[i].properties.iso_a3 === landData[j].CountryCode){
-                let emission = features[i].properties.emissionData;
-                let land = parseFloat(landData[j]["2016"]);
-                features[i].properties.emissionPerLandData = emission / land;
-                if(features[i].properties.emissionPerLandData > maxEmissionPerLand){
-                    maxEmissionPerLand = features[i].properties.emissionPerLandData;
-                }
-            }
-        }
-    }
-
+    let colors = updateYear(features,emissionData,populationData,landData,year);
+    let colorTotal = colors[0];
+    let colorPopulation = colors[1];
+    let colorLand = colors[2];
 
     let projection = d3.geoMercator()
                     .fitExtent([[0,0],[WIDTH-30,HEIGHT-30]],mapData);
     let geoPath = d3.geoPath(projection);
-
-    let colorTotal = d3.scalePow()
-                .exponent(0.25)
-                .domain([0,maxEmission])
-                .range(['white', 'red']);
-
-    let colorPopulation = d3.scalePow()
-                .exponent(0.25)
-                .domain([0,maxEmissionPerCapita])
-                .range(["white","red"]);
-
-    let colorLand = d3.scalePow()
-                .exponent(0.25)
-                .domain([0,maxEmissionPerLand])
-                .range(["white","red"]);
 
     let zoom = d3.zoom();
     let map = svg
@@ -145,6 +93,23 @@ Promise.all([emissionData,populationData,landData,mapData])
         d3.selectAll(".country")
         .style("fill",changeColor);
     });
+
+    d3.select("#year")
+    .on("change",function(){
+        year = d3.select("#year").property("value");
+        d3.select("#yearOutput").text(year);
+        
+        let colors = updateYear(features,emissionData,populationData,landData,year);
+        colorTotal = colors[0];
+        colorPopulation = colors[1];
+        colorLand = colors[2];
+
+        d3.selectAll(".country")
+        .style("fill",changeColor);
+
+    });
+
+    d3.select("#yearOutput").text(d3.select("#year").property("value"));
     
     function changeColor(data){
         switch(mode){
@@ -158,6 +123,66 @@ Promise.all([emissionData,populationData,landData,mapData])
     alert("Hubo un error al cargar los datos");
     console.error(e);
 });
+
+function updateYear(features,emissionData,populationData,landData,year){
+    let maxEmission = 0;
+    for(let i=0;i<features.length;i++){
+        for(let j=0;j<emissionData.length;j++){
+            if(features[i].properties.iso_a3 === emissionData[j].Code &&
+                emissionData[j].Year == year
+                ){
+                features[i].properties.emissionData = parseFloat(emissionData[j].Emissions);
+                if(parseFloat(emissionData[j].Emissions) > maxEmission){
+                    maxEmission = parseFloat(emissionData[j].Emissions);
+                }
+            }
+        }
+    }
+
+    let maxEmissionPerCapita = 0;
+    for(let i=0;i<features.length;i++){
+        for(let j=0;j<populationData.length;j++){
+            if(features[i].properties.iso_a3 === populationData[j].CountryCode){
+                let emission = features[i].properties.emissionData;
+                let population = parseFloat(populationData[j][year]);
+                features[i].properties.emissionPerCapitaData = emission / population;
+                if(features[i].properties.emissionPerCapitaData > maxEmissionPerCapita){
+                    maxEmissionPerCapita = features[i].properties.emissionPerCapitaData;
+                }
+            }
+        }
+    }
+
+    let maxEmissionPerLand = 0;
+    for(let i=0;i<features.length;i++){
+        for(let j=0;j<landData.length;j++){
+            if(features[i].properties.iso_a3 === landData[j].CountryCode){
+                let emission = features[i].properties.emissionData;
+                let land = parseFloat(landData[j][year]);
+                features[i].properties.emissionPerLandData = emission / land;
+                if(features[i].properties.emissionPerLandData > maxEmissionPerLand){
+                    maxEmissionPerLand = features[i].properties.emissionPerLandData;
+                }
+            }
+        }
+    }
+    let colorTotal = d3.scalePow()
+                .exponent(0.25)
+                .domain([0,maxEmission])
+                .range(['white', 'red']);
+
+    let colorPopulation = d3.scalePow()
+                .exponent(0.25)
+                .domain([0,maxEmissionPerCapita])
+                .range(["white","red"]);
+
+    let colorLand = d3.scalePow()
+                .exponent(0.25)
+                .domain([0,maxEmissionPerLand])
+                .range(["white","red"]);
+
+    return [colorTotal,colorPopulation,colorLand];
+}
 
 function clone(selector) {
     var node = d3.select(selector).node();
