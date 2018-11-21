@@ -19,12 +19,33 @@
             body{
                 margin: 0;
                 padding: 0;
+                font-family: Courier;
+            }
+            #control{
+                margin-top: -100px;
+                margin-left: 10px;
+                padding-left: 10px;
+            }
+            select{
+                font-family: Courier;
+                border: solid 1px black;
+            }
+            label{
+                font-weight: bold;
             }
         </style>
     </head>
     <body>
         <div id="grafico">
 
+        </div>
+        <div id="control">
+            <label>Mode</label>
+            <select id="mapMode" >
+                <option selected value="total">Absolute</option>
+                <option value="population">Per Capita</option>
+                <option value="land">Per Land</option>
+            </select>
         </div>
         <script src="grafico.js" async defer></script>
     </body>
