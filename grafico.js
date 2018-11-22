@@ -86,19 +86,45 @@ Promise.all([emissionData,populationData,landData,mapData])
         .style("fill","black")
         .style("font-family","Courier")
         .text("");
+        
+    let legendAxis = d3.axisRight()
+        .scale(colorTotal.range([0,500]))
+        .tickFormat(d3.format("d"));
+
+    svg.append("g")
+    .attr("id","legend")
+    .attr("transform","translate("+(WIDTH-100)+",100)")
+    .call(legendAxis);
+
+    let legendScale = d3.scaleLinear()
+    .domain([0,500])
+    .range(["white","red"]);
+
+    svg.append("g")
+    .attr("transform","translate("+(WIDTH-155)+",100)")
+    .selectAll(".bars")
+    .data(d3.range(0,500,10))
+    .enter()
+    .append("rect")
+    .attr("y",(d,i)=>i*10)
+    .attr("x","0")
+    .attr("width",50)
+    .attr("height",10)
+    .attr("fill",legendScale);
 
     d3.select("#mapMode")
     .on("change",function(){
         mode = d3.select("#mapMode").property("value");
         d3.selectAll(".country")
         .style("fill",changeColor);
+        changeLegend();
     });
 
     d3.select("#year")
     .on("change",function(){
         year = d3.select("#year").property("value");
         d3.select("#yearOutput").text(year);
-        
+
         let colors = updateYear(features,emissionData,populationData,landData,year);
         colorTotal = colors[0];
         colorPopulation = colors[1];
@@ -106,23 +132,56 @@ Promise.all([emissionData,populationData,landData,mapData])
 
         d3.selectAll(".country")
         .style("fill",changeColor);
+        changeLegend();
 
     });
 
     d3.select("#yearOutput").text(d3.select("#year").property("value"));
     
     function changeColor(data){
+
         switch(mode){
             case "total": return colorTotal(data.properties.emissionData || 0);
             case "population": return colorPopulation(data.properties.emissionPerCapitaData || 0);
             case "land": return colorLand(data.properties.emissionPerLandData || 0);
         }
     }
+    function changeLegend(){
+        let color;
+        switch(mode){
+            case "total": color=colorTotal;break;
+            case "population": color=colorPopulation;break;
+            case "land": color=colorLand;break;
+        }
+        d3.select("#legend").remove();
+        let prevRange = color.range();
+        color = color.range([0,500]);
+        let legendAxis = d3.axisRight()
+            .scale(color)
+            .tickFormat((t)=>{
+                if(mode == "total"){
+                    return d3.format("d")(t);
+                }else if(mode == "population"){
+                    return d3.format(".1f")(t*1000000);
+                }else{
+                    return d3.format(".1f")(t*1000);
+                }
+            });
+    
+        svg.append("g")
+            .attr("id","legend")
+            .attr("transform","translate("+(WIDTH-100)+",100)")
+            .call(legendAxis);
+    
+        color.range(prevRange);
+    }
+    
 })
 .catch((e)=>{
     alert("Hubo un error al cargar los datos");
     console.error(e);
 });
+
 
 function updateYear(features,emissionData,populationData,landData,year){
     let maxEmission = 0;
@@ -198,13 +257,15 @@ function mouseOver(data){
     countryName.text(name);
     emissionText.text("Total: "+emission+" Mt");
     populationText.text("Per capita: "+(perCapita*1000000).toFixed(2)+" t/habitant");
-    landText.text("By square m: "+(perLand*1000).toFixed(2)+" t/m2");
+    landText.text("By square m: "+(perLand*1000).toFixed(2)+" t/m")
+        .append("tspan")
+        .attr("dy","-5")
+        .text("2");
     let country = clone(this);
     country
         .attr("class","currentCountry")
         .style("stroke","red")
         .on("mouseout",function(){
-            console.log("OUT");
             d3.select(this).remove();
         });
 }
