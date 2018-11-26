@@ -11,20 +11,27 @@
 
         </div>
         <div id="control">
-            <label>Mode</label>
-            <select id="mapMode" >
-                <option selected value="total">Absolute</option>
-                <option value="population">Per Capita</option>
-                <option value="land">Per Land</option>
-            </select>
-            <br>
-            <label>Year</label>
-            <span id="yearOutput"></span>
-            <br>
-            <label>1960</label>
-            <input type="range" id="year" min="1960" max="2016" value="2016">
-            <label>2016</label>
-        </div>
+	    <div>
+		    <label>Mode</label>
+		    <select id="mapMode" >
+			<option selected value="total">Absolute</option>
+			<option value="population">Per Capita</option>
+			<option value="land">Per Land</option>
+		    </select>
+		    <br>
+		    <label>Year</label>
+		    <span id="yearOutput"></span>
+		    <br>
+		    <label>1960</label>
+		    <input type="range" id="year" min="1960" max="2016" value="2016">
+		    <label>2016</label>
+	    </div>
+	    <div id="copyright">
+			&copy; Adrián Arroyo Calle 2018
+			<br>
+			Sources: <a href="https://ourworldindata.org/co2-and-other-greenhouse-gas-emissions">Our World in Data</a> / <a href="https://data.worldbank.org/">The World Bank</a> / <a href="https://geojson-maps.ash.ms/">Ash Kyd GeoJSON</a>
+	    </div>
+	</div>
         <script src="grafico.js" async defer></script>
     </body>
 </html>

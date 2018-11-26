@@ -1,10 +1,13 @@
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
+const FONT = "IBM Plex Mono";
 
 let svg = d3.select("#grafico")
     .append("svg")
     .attr("width",WIDTH)
     .attr("height",HEIGHT-10);
+
+svg.append("defs").append("style").text("@font-face{ font-family: 'IBM Plex Mono'; src: url('IBMPlexMono-Regular.ttf');}");
 
 let countryName;
 
@@ -32,7 +35,7 @@ Promise.all([emissionData,populationData,landData,mapData])
     let colorLand = colors[2];
 
     let projection = d3.geoMercator()
-                    .fitExtent([[0,0],[WIDTH-30,HEIGHT-30]],mapData);
+                    .fitExtent([[0,40],[WIDTH-30,HEIGHT-70]],mapData);
     let geoPath = d3.geoPath(projection);
 
     let zoom = d3.zoom();
@@ -41,6 +44,12 @@ Promise.all([emissionData,populationData,landData,mapData])
         .call(zoom.on("zoom",()=>{
             map.attr("transform",d3.event.transform);
         }));
+    map.append("rect")
+	.style("fill","white")
+	.attr("x","0")
+	.attr("y","0")
+	.attr("width",WIDTH)
+	.attr("height",HEIGHT);
     
     map.selectAll(".country")
         .data(features)
@@ -54,12 +63,22 @@ Promise.all([emissionData,populationData,landData,mapData])
         })
         .on("mouseover",mouseOver);
 
+    svg.append("text")
+	.attr("x",WIDTH/2)
+	.attr("y",27)
+	.attr("text-anchor","middle")
+	.style("fill","black")
+	.style("font-family",FONT)
+	.style("font-weight","bold")
+	.style("font-size","22px")
+	.text("CO2 emissions by country");
+
     countryName = svg.append("text")
         .attr("id","name")
         .attr("x","10")
         .attr("y","20")
         .style("fill","black")
-        .style("font-family","Courier")
+        .style("font-family",FONT)
         .style("font-weight","bold")
         .text("");
     
@@ -68,7 +87,7 @@ Promise.all([emissionData,populationData,landData,mapData])
         .attr("x","10")
         .attr("y",40)
         .style("fill","black")
-        .style("font-family","Courier")
+        .style("font-family",FONT)
         .text("");
 
     populationText = svg.append("text")
@@ -76,7 +95,7 @@ Promise.all([emissionData,populationData,landData,mapData])
         .attr("x","10")
         .attr("y","70")
         .style("fill","black")
-        .style("font-family","Courier")
+        .style("font-family",FONT)
         .text("");
 
     landText = svg.append("text")
@@ -84,10 +103,10 @@ Promise.all([emissionData,populationData,landData,mapData])
         .attr("x","10")
         .attr("y","100")
         .style("fill","black")
-        .style("font-family","Courier")
+        .style("font-family",FONT)
         .text("");
         
-    let legendAxis = d3.axisRight()
+    /*let legendAxis = d3.axisRight()
         .scale(colorTotal.range([0,500]))
         .tickFormat(d3.format("d"));
 
@@ -110,14 +129,14 @@ Promise.all([emissionData,populationData,landData,mapData])
     .attr("x","0")
     .attr("width",50)
     .attr("height",10)
-    .attr("fill",legendScale);
+    .attr("fill",legendScale);*/
 
     d3.select("#mapMode")
     .on("change",function(){
         mode = d3.select("#mapMode").property("value");
         d3.selectAll(".country")
         .style("fill",changeColor);
-        changeLegend();
+        //changeLegend();
     });
 
     d3.select("#year")
@@ -132,7 +151,7 @@ Promise.all([emissionData,populationData,landData,mapData])
 
         d3.selectAll(".country")
         .style("fill",changeColor);
-        changeLegend();
+        //changeLegend();
 
     });
 
@@ -154,8 +173,7 @@ Promise.all([emissionData,populationData,landData,mapData])
             case "land": color=colorLand;break;
         }
         d3.select("#legend").remove();
-        let prevRange = color.range();
-        color = color.range([0,500]);
+        color.range([0,500]);
         let legendAxis = d3.axisRight()
             .scale(color)
             .tickFormat((t)=>{
@@ -173,7 +191,7 @@ Promise.all([emissionData,populationData,landData,mapData])
             .attr("transform","translate("+(WIDTH-100)+",100)")
             .call(legendAxis);
     
-        color.range(prevRange);
+        color.range(["white","red"]);
     }
     
 })
